@@ -5,57 +5,14 @@ This project implements the Full Stack Intern assessment using:
 - **Backend**: Node.js + Express + MongoDB (Mongoose)
 - **Frontend**: React (Vite) + Tailwind CSS
 
-Each employee record includes:
-
-- `id` (Mongo `_id`)
-- `name`
-- `email` (unique)
-- `department`
-- `salary`
-- `status` (`ACTIVE` / `INACTIVE`)
-
----
 
 ## Requirement Mapping (Assessment Checklist)
 
 ### 1) Add Employee
-
-- **Endpoint**: `POST /api/employees`
-- **Purpose**: create a new employee record.
-- **Validation**:
-  - required: `name`, `email`, `department`, `salary`
-  - `salary` must be non-negative
-  - `email` must be unique
-
 ### 2) Fetch Employee by ID
-
-- **Endpoint**: `GET /api/employees/:id`
-- **Purpose**: return a specific employee using Mongo `_id`.
-- Returns `404` if not found and `400` for invalid id format.
-
 ### 3) Fetch All Active Employees
-
-- **Endpoint**: `GET /api/employees`
-- **Default behavior**: returns only employees with `status: "ACTIVE"`.
-- This satisfies: “Deleted (INACTIVE) employees should not appear in Fetch All Active Employees”.
-
 ### 4) Update Employee
-
-- **Endpoint**: `PUT /api/employees/:id`
-- **Purpose**: update existing fields (`name`, `email`, `department`, `salary`, `status`).
-- Unique email validation is enforced here as well.
-
 ### 5) Delete Employee (Soft Delete)
-
-- **Endpoint**: `DELETE /api/employees/:id`
-- **Behavior**: record is not removed; status is updated to `INACTIVE`.
-
-### Notes / Extra
-
-- Employee listing API also supports `GET /api/employees?status=ACTIVE|INACTIVE|ALL` for frontend filtering.
-- Default remains `ACTIVE`, so assignment requirement is preserved.
-
----
 
 ## Backend Setup
 
@@ -74,18 +31,11 @@ npm install
 MONGO_URI=mongodb://127.0.0.1:27017/employee_management
 PORT=5000
 ```
-
-(`.env.example` and `.env` are included.)
-
 3. Start backend:
 
 ```bash
 npm run dev
 ```
-
-Backend runs at `http://localhost:5000`.
-
----
 
 ## Frontend Setup
 
@@ -104,21 +54,6 @@ npm install
 npm run dev
 ```
 
-Vite runs on an available port (for example `http://localhost:5173`).
-
-The frontend calls `/api/*`, and Vite proxies those requests to backend (`127.0.0.1:5000`).
-
----
-
-## Project Structure
-
-- `backend/src/models/Employee.js` - employee schema and constraints
-- `backend/src/routes/employees.js` - CRUD + soft delete API routes
-- `backend/src/index.js` - app bootstrap, middleware, DB connection
-- `frontend/src/App.jsx` - main UI (form, table, filters, actions)
-- `frontend/vite.config.mts` - Vite config and API proxy
-
----
 
 ## 1-Minute Interview Explanation
 
