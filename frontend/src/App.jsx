@@ -22,7 +22,6 @@ function App() {
   async function parseJsonSafe(res) {
     const text = await res.text();
     if (!text) return {};
-    // If server provided JSON content-type, try to parse; otherwise return the raw text as a message
     const contentType = res.headers.get("content-type") || "";
     if (contentType.includes("application/json")) {
       try {
@@ -31,7 +30,6 @@ function App() {
         return { message: "Malformed JSON response from server" };
       }
     }
-    // Non-JSON response: surface the server text as a message instead of throwing
     return { message: text || "Server returned non-JSON response" };
   }
 
@@ -47,7 +45,6 @@ function App() {
       if (!res.ok) {
         throw new Error(data.message || "Failed to fetch employees");
       }
-      // if backend returns an array, use it directly; otherwise default to empty list
       setEmployees(Array.isArray(data) ? data : []);
     } catch (err) {
       setError(err.message);

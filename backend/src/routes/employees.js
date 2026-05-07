@@ -3,7 +3,6 @@ const Employee = require('../models/Employee');
 
 const router = express.Router();
 
-// Create a new employee
 router.post('/', async (req, res) => {
   try {
     const { name, email, department, salary, status } = req.body;
@@ -29,7 +28,6 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Fetch employee by ID
 router.get('/:id', async (req, res) => {
   try {
     const employee = await Employee.findById(req.params.id);
@@ -42,7 +40,6 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Fetch employees by status (default: ACTIVE)
 router.get('/', async (req, res) => {
   try {
     const status = (req.query.status || 'ACTIVE').toUpperCase();
@@ -62,7 +59,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Update employee
 router.put('/:id', async (req, res) => {
   try {
     const { name, email, department, salary, status } = req.body;
@@ -91,7 +87,6 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Soft delete employee (mark as INACTIVE)
 router.delete('/:id', async (req, res) => {
   try {
     const employee = await Employee.findByIdAndUpdate(
