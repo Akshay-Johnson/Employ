@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
-const API_BASE = "/api/employees";
+const API_BASE = `${import.meta.env.VITE_API_URL}/api/employees`;
 
 function App() {
   const [employees, setEmployees] = useState([]);
