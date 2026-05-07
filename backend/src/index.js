@@ -18,7 +18,19 @@ app.use('/api/employees', employeesRouter);
 
 // Basic health route
 app.get('/', (req, res) => {
-  res.send('Employee Management API is running');
+  res.json({ message: 'Employee Management API is running' });
+});
+
+// API 404 handler - always return JSON for unknown API routes
+app.use('/api', (req, res) => {
+  res.status(404).json({ message: 'API route not found' });
+});
+
+// Global error handler - ensure JSON responses for errors
+app.use((err, req, res, next) => {
+  console.error(err);
+  const status = err.status || 500;
+  res.status(status).json({ message: err.message || 'Internal Server Error' });
 });
 
 // Database connection

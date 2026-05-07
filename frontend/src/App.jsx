@@ -21,14 +21,18 @@ function App() {
 
   async function parseJsonSafe(res) {
     const text = await res.text();
-    if (!text) {
-      return {};
+    if (!text) return {};
+    // If server provided JSON content-type, try to parse; otherwise return the raw text as a message
+    const contentType = res.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      try {
+        return JSON.parse(text);
+      } catch {
+        return { message: 'Malformed JSON response from server' };
+      }
     }
-    try {
-      return JSON.parse(text);
-    } catch {
-      throw new Error('Received non-JSON response from server');
-    }
+    // Non-JSON response: surface the server text as a message instead of throwing
+    return { message: text || 'Server returned non-JSON response' };
   }
 
   const fetchEmployees = useCallback(async () => {
