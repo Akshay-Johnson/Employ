@@ -1,45 +1,51 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
-const API_BASE = '/api/employees';
+const API_BASE = "/api/employees";
 
 function App() {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [info, setInfo] = useState('');
-  const [listStatusFilter, setListStatusFilter] = useState('ACTIVE');
+  const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
+  const [listStatusFilter, setListStatusFilter] = useState("ACTIVE");
   const [form, setForm] = useState({
-    id: '',
-    name: '',
-    email: '',
-    department: '',
-    salary: '',
-    status: 'ACTIVE'
+    id: "",
+    name: "",
+    email: "",
+    department: "",
+    salary: "",
+    status: "ACTIVE",
   });
 
   const isEditing = useMemo(() => Boolean(form.id), [form.id]);
 
   async function parseJsonSafe(res) {
     const text = await res.text();
-    if (!text) {
-      return {};
+    if (!text) return {};
+    // If server provided JSON content-type, try to parse; otherwise return the raw text as a message
+    const contentType = res.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) {
+      try {
+        return JSON.parse(text);
+      } catch {
+        return { message: "Malformed JSON response from server" };
+      }
     }
-    try {
-      return JSON.parse(text);
-    } catch {
-      throw new Error('Received non-JSON response from server');
-    }
+    // Non-JSON response: surface the server text as a message instead of throwing
+    return { message: text || "Server returned non-JSON response" };
   }
 
   const fetchEmployees = useCallback(async () => {
     try {
       setLoading(true);
-      setError('');
-      const query = new URLSearchParams({ status: listStatusFilter }).toString();
+      setError("");
+      const query = new URLSearchParams({
+        status: listStatusFilter,
+      }).toString();
       const res = await fetch(`${API_BASE}?${query}`);
       const data = await parseJsonSafe(res);
       if (!res.ok) {
-        throw new Error(data.message || 'Failed to fetch employees');
+        throw new Error(data.message || "Failed to fetch employees");
       }
       // if backend returns an array, use it directly; otherwise default to empty list
       setEmployees(Array.isArray(data) ? data : []);
@@ -61,24 +67,24 @@ function App() {
 
   function resetForm() {
     setForm({
-      id: '',
-      name: '',
-      email: '',
-      department: '',
-      salary: '',
-      status: 'ACTIVE'
+      id: "",
+      name: "",
+      email: "",
+      department: "",
+      salary: "",
+      status: "ACTIVE",
     });
-    setInfo('');
-    setError('');
+    setInfo("");
+    setError("");
   }
 
   async function handleSubmit(event) {
     event.preventDefault();
-    setError('');
-    setInfo('');
+    setError("");
+    setInfo("");
 
     if (!form.name || !form.email || !form.department || !form.salary) {
-      setError('Please fill in all required fields.');
+      setError("Please fill in all required fields.");
       return;
     }
 
@@ -87,22 +93,26 @@ function App() {
       email: form.email.trim(),
       department: form.department.trim(),
       salary: Number(form.salary),
-      status: form.status
+      status: form.status,
     };
 
     try {
       const url = isEditing ? `${API_BASE}/${form.id}` : API_BASE;
-      const method = isEditing ? 'PUT' : 'POST';
+      const method = isEditing ? "PUT" : "POST";
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
       const data = await parseJsonSafe(res);
       if (!res.ok) {
-        throw new Error(data.message || 'Request failed');
+        throw new Error(data.message || "Request failed");
       }
-      setInfo(isEditing ? 'Employee updated successfully.' : 'Employee added successfully.');
+      setInfo(
+        isEditing
+          ? "Employee updated successfully."
+          : "Employee added successfully.",
+      );
       resetForm();
       fetchEmployees();
     } catch (err) {
@@ -117,28 +127,28 @@ function App() {
       email: emp.email,
       department: emp.department,
       salary: String(emp.salary),
-      status: emp.status
+      status: emp.status,
     });
-    setInfo('');
-    setError('');
+    setInfo("");
+    setError("");
   }
 
   async function handleDelete(id, status) {
-    if (status === 'INACTIVE') {
-      setInfo('This employee is already INACTIVE.');
-      setError('');
+    if (status === "INACTIVE") {
+      setInfo("This employee is already INACTIVE.");
+      setError("");
       return;
     }
-    if (!window.confirm('Mark this employee as INACTIVE?')) return;
-    setError('');
-    setInfo('');
+    if (!window.confirm("Mark this employee as INACTIVE?")) return;
+    setError("");
+    setInfo("");
     try {
-      const res = await fetch(`${API_BASE}/${id}`, { method: 'DELETE' });
+      const res = await fetch(`${API_BASE}/${id}`, { method: "DELETE" });
       const data = await parseJsonSafe(res);
       if (!res.ok) {
-        throw new Error(data.message || 'Failed to delete employee');
+        throw new Error(data.message || "Failed to delete employee");
       }
-      setInfo('Employee marked as INACTIVE.');
+      setInfo("Employee marked as INACTIVE.");
       fetchEmployees();
     } catch (err) {
       setError(err.message);
@@ -246,7 +256,7 @@ function App() {
                   type="submit"
                   className="inline-flex flex-1 items-center justify-center rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-1"
                 >
-                  {isEditing ? 'Update Employee' : 'Add Employee'}
+                  {isEditing ? "Update Employee" : "Add Employee"}
                 </button>
                 {isEditing && (
                   <button
@@ -281,13 +291,15 @@ function App() {
                   disabled={loading}
                   className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {loading ? 'Refreshing…' : 'Refresh'}
+                  {loading ? "Refreshing…" : "Refresh"}
                 </button>
               </div>
             </div>
 
             {employees.length === 0 ? (
-              <p className="text-sm text-slate-500">No employees found for selected filter.</p>
+              <p className="text-sm text-slate-500">
+                No employees found for selected filter.
+              </p>
             ) : (
               <div className="overflow-x-auto rounded-xl border border-slate-200">
                 <table className="min-w-full divide-y divide-slate-200 text-sm">
@@ -317,7 +329,9 @@ function App() {
                     {employees.map((emp) => (
                       <tr key={emp._id}>
                         <td className="px-4 py-2 whitespace-nowrap">
-                          <div className="font-medium text-slate-900">{emp.name}</div>
+                          <div className="font-medium text-slate-900">
+                            {emp.name}
+                          </div>
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap text-slate-700">
                           {emp.email}
@@ -331,9 +345,9 @@ function App() {
                         <td className="px-4 py-2 whitespace-nowrap hidden md:table-cell">
                           <span
                             className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                              emp.status === 'ACTIVE'
-                                ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100'
-                                : 'bg-red-50 text-red-700 ring-1 ring-red-100'
+                              emp.status === "ACTIVE"
+                                ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100"
+                                : "bg-red-50 text-red-700 ring-1 ring-red-100"
                             }`}
                           >
                             {emp.status}
@@ -349,14 +363,16 @@ function App() {
                             </button>
                             <button
                               onClick={() => handleDelete(emp._id, emp.status)}
-                              disabled={emp.status === 'INACTIVE'}
+                              disabled={emp.status === "INACTIVE"}
                               className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium shadow-sm ${
-                                emp.status === 'INACTIVE'
-                                  ? 'cursor-not-allowed bg-slate-200 text-slate-500'
-                                  : 'bg-red-600 text-white hover:bg-red-700'
+                                emp.status === "INACTIVE"
+                                  ? "cursor-not-allowed bg-slate-200 text-slate-500"
+                                  : "bg-red-600 text-white hover:bg-red-700"
                               }`}
                             >
-                              {emp.status === 'INACTIVE' ? 'Already Inactive' : 'Delete'}
+                              {emp.status === "INACTIVE"
+                                ? "Already Inactive"
+                                : "Delete"}
                             </button>
                           </div>
                         </td>
@@ -374,4 +390,3 @@ function App() {
 }
 
 export default App;
-
